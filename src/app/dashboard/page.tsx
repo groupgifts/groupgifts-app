@@ -83,7 +83,7 @@ export default function Dashboard() {
             const pct = pool.goal > 0 ? Math.min(100, Math.round((raised / pool.goal) * 100)) : 0
             const done = pct >= 100
             return (
-              <Link href={`/pool/${pool.id}`} key={pool.id} className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-md transition-shadow">
+<Link href={`/pool/${pool.slug}`} key={pool.id} className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-md transition-shadow">
                 <div className="flex justify-between items-start mb-3">
                   <div>
                     <h3 className="font-semibold text-gray-900">{pool.title}</h3>

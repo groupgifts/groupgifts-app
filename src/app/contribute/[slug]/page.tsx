@@ -1,0 +1,209 @@
+'use client'
+import { useState, useEffect } from 'react'
+import { useParams } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
+
+export default function Contribute() {
+  const { slug } = useParams()
+  const [pool, setPool] = useState<any>(null)
+  const [contributions, setContributions] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [step, setStep] = useState<'view' | 'contribute' | 'success'>('view')
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [amount, setAmount] = useState('')
+  const [message, setMessage] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
+
+  useEffect(() => { loadPool() }, [slug])
+
+  async function loadPool() {
+    const { data: poolData } = await supabase
+      .from('pools')
+      .select('*')
+      .eq('slug', slug)
+      .single()
+
+    if (!poolData) { setLoading(false); return }
+    setPool(poolData)
+
+    const { data: contribs } = await supabase
+      .from('contributions')
+      .select('contributor_name, message, amount, created_at')
+      .eq('pool_id', poolData.id)
+      .eq('status', 'paid')
+      .order('created_at', { ascending: false })
+
+    setContributions(contribs || [])
+    setLoading(false)
+  }
+
+  async function handleContribute() {
+    if (!name || !email || !amount) return
+    setSubmitting(true)
+    setError('')
+    try {
+      const { error } = await supabase.from('contributions').insert({
+        pool_id: pool.id,
+        contributor_name: name,
+        contributor_email: email,
+        message: message || null,
+        amount: parseFloat(amount),
+        total_charged: parseFloat(amount),
+        platform_fee: parseFloat(amount) * 0.05,
+        stripe_fee: 0,
+        payment_intent_id: 'test_' + Date.now(),
+        status: 'paid',
+        paid_at: new Date().toISOString(),
+      })
+      if (error) throw error
+      setStep('success')
+    } catch (err: any) {
+      setError(err.message)
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  if (loading) return (
+    <div className="min-h-screen bg-[#F4F3F0] flex items-center justify-center">
+      <div className="text-gray-400 text-sm">Loading...</div>
+    </div>
+  )
+
+  if (!pool) return (
+    <div className="min-h-screen bg-[#F4F3F0] flex items-center justify-center">
+      <div className="text-gray-400 text-sm">Pool not found.</div>
+    </div>
+  )
+
+  const raised = contributions.reduce((sum, c) => sum + c.amount, 0)
+  const pct = Math.min(100, pool.goal > 0 ? Math.round((raised / pool.goal) * 100) : 0)
+  const done = pct >= 100
+
+  if (step === 'success') return (
+    <div className="min-h-screen bg-[#F4F3F0] flex items-center justify-center p-6">
+      <div className="bg-white rounded-2xl p-10 text-center max-w-md w-full border border-gray-100">
+        <div className="text-5xl mb-4">🎉</div>
+        <h2 className="text-2xl font-light italic mb-2" style={{fontFamily: 'Georgia, serif'}}>You're in!</h2>
+        <p className="text-gray-400 text-sm">Your contribution to <strong>{pool.title}</strong> has been added. Receipt sent to {email}.</p>
+        <div className="mt-6 bg-green-50 rounded-xl p-4">
+          <div className="text-sm text-green-700 font-semibold">Updated progress</div>
+          <div className="h-2 bg-green-100 rounded-full overflow-hidden mt-2">
+            <div className="h-full bg-green-500 rounded-full" style={{width: `${Math.min(100, ((raised + parseFloat(amount)) / pool.goal) * 100)}%`}} />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
+  return (
+    <div className="min-h-screen bg-[#F4F3F0]">
+      <nav className="bg-white border-b border-gray-100 px-6 py-4 text-center">
+        <h1 className="text-xl font-light italic" style={{fontFamily: 'Georgia, serif'}}>
+          GroupGifts<span className="text-[#E8733A]">.me</span>
+        </h1>
+      </nav>
+
+      <main className="max-w-lg mx-auto px-6 py-10">
+
+        {/* Pool info */}
+        <div className="bg-white rounded-2xl p-6 mb-6 border border-gray-100">
+          <div className="text-xs font-semibold text-[#E8733A] uppercase tracking-wide mb-1">{pool.occasion}</div>
+          <h2 className="text-2xl font-light italic mb-1" style={{fontFamily: 'Georgia, serif'}}>{pool.title}</h2>
+          <p className="text-gray-400 text-sm mb-4">For {pool.recipient}</p>
+
+          {pool.gift_name && (
+            <div className="bg-orange-50 rounded-xl p-3 mb-4">
+              <div className="text-xs text-gray-400 mb-1">🎁 Target gift</div>
+              <div className="text-sm font-semibold text-gray-900">{pool.gift_name}</div>
+            </div>
+          )}
+
+          <div className="text-3xl font-bold mb-1">${raised.toFixed(0)}</div>
+          <div className="text-sm text-gray-400 mb-3">of ${pool.goal} goal</div>
+          <div className="h-2 bg-gray-100 rounded-full overflow-hidden mb-2">
+            <div className="h-full rounded-full" style={{width: `${pct}%`, background: done ? '#18B894' : '#E8733A'}} />
+          </div>
+          <div className="text-sm text-gray-400">{pct}% funded · {contributions.length} contributor{contributions.length !== 1 ? 's' : ''}</div>
+        </div>
+
+        {/* Contribute form */}
+        {step === 'view' && (
+          <div>
+            {!done && (
+              <button onClick={() => setStep('contribute')}
+                className="w-full bg-[#E8733A] text-white py-4 rounded-xl font-semibold text-base hover:bg-[#C85E28] transition-colors mb-4">
+                Chip in →
+              </button>
+            )}
+
+            {/* Messages */}
+            {contributions.length > 0 && (
+              <div className="flex flex-col gap-3 mt-2">
+                <h3 className="font-semibold text-gray-700 text-sm">Already chipped in</h3>
+                {contributions.map((c, i) => (
+                  <div key={i} className="bg-white rounded-xl p-4 border border-gray-100 flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-[#E8733A] flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+                      {c.contributor_name[0].toUpperCase()}
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-sm font-semibold text-gray-900">{c.contributor_name}</div>
+                      {c.message && <div className="text-xs text-gray-400">"{c.message}"</div>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {step === 'contribute' && (
+          <div className="bg-white rounded-2xl p-6 border border-gray-100">
+            <h3 className="text-lg font-light italic mb-4" style={{fontFamily: 'Georgia, serif'}}>Add your contribution</h3>
+
+            {error && <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg mb-4">{error}</div>}
+
+            <div className="flex flex-col gap-4">
+              <div>
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Your name</label>
+                <input value={name} onChange={e => setName(e.target.value)}
+                  className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#E8733A]"
+                  placeholder="First and last name" />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Email (for receipt)</label>
+                <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+                  className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#E8733A]"
+                  placeholder="you@email.com" />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Amount (USD)</label>
+                <input type="number" value={amount} onChange={e => setAmount(e.target.value)}
+                  className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#E8733A]"
+                  placeholder="e.g. 50" min="25" />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Personal message (optional)</label>
+                <textarea value={message} onChange={e => setMessage(e.target.value)} rows={3}
+                  className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#E8733A] resize-none"
+                  placeholder="Write something for the recipient..." />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button onClick={() => setStep('view')} className="flex-1 border border-gray-200 text-gray-500 py-3 rounded-xl text-sm font-semibold">
+                ← Back
+              </button>
+              <button onClick={handleContribute} disabled={submitting || !name || !email || !amount}
+                className="flex-1 bg-[#E8733A] text-white py-3 rounded-xl text-sm font-semibold hover:bg-[#C85E28] transition-colors disabled:opacity-50">
+                {submitting ? 'Processing...' : `Contribute $${amount || '0'} →`}
+              </button>
+            </div>
+          </div>
+        )}
+      </main>
+    </div>
+  )
+}
