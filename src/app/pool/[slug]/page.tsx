@@ -169,7 +169,7 @@ export default function PoolDetail() {
                 className="w-full bg-[#0D0D0D] text-white py-3 rounded-xl text-sm font-semibold hover:bg-gray-800 transition-colors">
                 Close pool & request payout →
               </button>
-            </div>
+            </div>  
           </div>
         )}
       </main>
