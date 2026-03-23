@@ -1,3 +1,4 @@
+import Logo from '@/components/Logo'
 import Link from 'next/link'
 
 export default function Home() {
@@ -7,9 +8,7 @@ export default function Home() {
         
         {/* Logo */}
         <div className="mb-8">
-          <h1 className="text-4xl font-light italic" style={{fontFamily: 'Georgia, serif'}}>
-            GroupGifts<span className="text-[#E8733A]">.me</span>
-          </h1>
+          <Logo size={36} />
           <p className="text-gray-500 mt-2 text-sm">Organise surprise group gifts — effortlessly.</p>
         </div>
 

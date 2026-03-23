@@ -154,7 +154,24 @@ export default function PoolDetail() {
             ))}
           </div>
         )}
-
+{/* Close pool button */}
+        {!done && user && pool.organiser_id === user.id && (
+          <div className="mt-8 pt-6 border-t border-gray-200">
+            <div className="bg-white rounded-2xl p-5 border border-gray-100">
+              <div className="text-sm font-semibold text-gray-900 mb-1">Ready to close this pool?</div>
+              <div className="text-xs text-gray-400 mb-4">Once closed, no new contributions can be added. You'll receive the funds within 2 business days.</div>
+              <button
+                onClick={async () => {
+                  if (!confirm('Are you sure you want to close this pool?')) return
+                  await supabase.from('pools').update({ status: 'paid_out', closed_at: new Date().toISOString() }).eq('id', pool.id)
+                  setPool({ ...pool, status: 'paid_out' })
+                }}
+                className="w-full bg-[#0D0D0D] text-white py-3 rounded-xl text-sm font-semibold hover:bg-gray-800 transition-colors">
+                Close pool & request payout →
+              </button>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   )
