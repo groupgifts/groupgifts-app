@@ -216,6 +216,22 @@ export default function Home() {
                 />
                 <div style={{ marginTop: 12 }}>
                   <MockCard
+                    title="Sofia & Marco's Wedding 💍"
+                    sub="For Sofia & Marco · Wedding · Sep 6"
+                    amount="$2,400"
+                    goal="$2,000"
+                    pct={100}
+                    color="#18B894"
+                    contributors={['V','T','S','+']}
+                    contributorColors={['#9B6BF0','#2B9BF0','#E8733A','#F06B7A']}
+                    label="12 contributors"
+                    badge="🎉 Overfunded"
+                    badgeBg="#E6FAF6"
+                    badgeColor="#18B894"
+                  />
+                </div>
+                <div style={{ marginTop: 12 }}>
+                  <MockCard
                     title="Carolina's 50th 🎊"
                     sub="For Carolina V. · Birthday · Oct 18"
                     amount="$1,850"
@@ -302,6 +318,49 @@ export default function Home() {
                   <span style={{ fontSize: 18, width: 28, textAlign: 'center', flexShrink: 0 }}>{f.icon}</span>
                   <span style={{ fontSize: 15, fontWeight: 600, color: '#fff', minWidth: 240, flexShrink: 0 }}>{f.title}</span>
                   <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', lineHeight: 1.5 }}>{f.desc}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── TESTIMONIALS ── */}
+        <section style={{ background: '#fff', padding: '100px 24px' }}>
+          <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+            <div className="gg-fade" style={{ textAlign: 'center', marginBottom: 64 }}>
+              <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#E8733A', marginBottom: 14 }}>What organisers say</div>
+              <h2 style={{ fontFamily: SERIF, fontSize: 'clamp(28px,4vw,48px)', fontWeight: 400, lineHeight: 1.15, letterSpacing: '-0.02em' }}>
+                The person who organised it<br /><em style={{ fontStyle: 'italic' }}>gets all the credit.</em>
+              </h2>
+            </div>
+            <div className="gg-fade" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 20 }}>
+              {[
+                {
+                  quote: "I organised a group gift for my best friend's 30th with 14 people across 3 countries. GroupGifts handled the whole thing — I just shared one link.",
+                  name: 'Mariana S.', role: 'Organised a birthday pool · 14 contributors',
+                  color: '#FFD89B', initial: 'M',
+                },
+                {
+                  quote: "We collected €2,200 for our colleague's farewell gift in 48 hours. Everyone chipped in at their own pace, no awkward reminders needed.",
+                  name: 'James T.', role: 'Organised a farewell pool · 22 contributors',
+                  color: '#B8F0E6', initial: 'J',
+                },
+                {
+                  quote: "The digital card was such a beautiful touch. She cried when she saw all the messages from everyone. Absolutely worth it.",
+                  name: 'Sofia R.', role: 'Organised a wedding pool · 31 contributors',
+                  color: '#FFB8C1', initial: 'S',
+                },
+              ].map((t, i) => (
+                <div key={i} style={{ background: '#FAFAFA', border: '1px solid #E8E8E8', borderRadius: 14, padding: 28, boxShadow: '0 2px 16px rgba(0,0,0,0.07)' }}>
+                  <div style={{ color: '#E8733A', fontSize: 14, letterSpacing: 2, marginBottom: 14 }}>★★★★★</div>
+                  <p style={{ fontFamily: SERIF, fontSize: 17, fontStyle: 'italic', color: '#0D0D0D', lineHeight: 1.65, marginBottom: 20 }}>"{t.quote}"</p>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: '50%', background: t.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, color: '#3A3A3A', flexShrink: 0 }}>{t.initial}</div>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: '#0D0D0D' }}>{t.name}</div>
+                      <div style={{ fontSize: 12, color: '#888' }}>{t.role}</div>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
