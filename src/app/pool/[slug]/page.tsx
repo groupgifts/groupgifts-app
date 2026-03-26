@@ -18,6 +18,8 @@ export default function PoolDetail() {
   const [editing, setEditing] = useState(false)
   const [editGoal, setEditGoal] = useState('')
   const [editSplitCount, setEditSplitCount] = useState('')
+  const [editGiftName, setEditGiftName] = useState('')
+  const [editGiftUrl, setEditGiftUrl] = useState('')
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
@@ -38,6 +40,8 @@ export default function PoolDetail() {
     setPool(poolData)
     setEditGoal(String(poolData.goal))
     setEditSplitCount(String(poolData.split_count || ''))
+    setEditGiftName(poolData.gift_name || '')
+    setEditGiftUrl(poolData.gift_url || '')
 
     const { data: contribs } = await supabase
       .from('contributions')
@@ -56,11 +60,19 @@ export default function PoolDetail() {
       .update({
         goal: parseFloat(editGoal),
         split_count: pool.pool_type === 'split' ? parseInt(editSplitCount) : pool.split_count,
+        gift_name: editGiftName || null,
+        gift_url: editGiftUrl || null,
       })
       .eq('id', pool.id)
       .eq('organiser_id', user.id)
     if (!error) {
-      setPool({ ...pool, goal: parseFloat(editGoal), split_count: pool.pool_type === 'split' ? parseInt(editSplitCount) : pool.split_count })
+      setPool({
+        ...pool,
+        goal: parseFloat(editGoal),
+        split_count: pool.pool_type === 'split' ? parseInt(editSplitCount) : pool.split_count,
+        gift_name: editGiftName || null,
+        gift_url: editGiftUrl || null,
+      })
       setEditing(false)
     }
     setSaving(false)
@@ -156,22 +168,40 @@ export default function PoolDetail() {
                       className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#E8733A]" />
                   </div>
                 )}
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Gift name (optional)</label>
+                  <input value={editGiftName} onChange={e => setEditGiftName(e.target.value)}
+                    className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#E8733A]"
+                    placeholder="e.g. Hermès Earrings" />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Product URL (optional)</label>
+                  <input value={editGiftUrl} onChange={e => setEditGiftUrl(e.target.value)}
+                    className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#E8733A]"
+                    placeholder="https://..." />
+                </div>
                 <div className="flex gap-2 mt-1">
                   <button onClick={saveEdit} disabled={saving || !editGoal}
                     className="flex-1 bg-[#E8733A] text-white py-2 rounded-lg text-sm font-semibold disabled:opacity-50">
                     {saving ? 'Saving...' : 'Save changes'}
                   </button>
-                  <button onClick={() => { setEditing(false); setEditGoal(String(pool.goal)); setEditSplitCount(String(pool.split_count || '')) }}
+                  <button onClick={() => { setEditing(false); setEditGoal(String(pool.goal)); setEditSplitCount(String(pool.split_count || '')); setEditGiftName(pool.gift_name || ''); setEditGiftUrl(pool.gift_url || '') }}
                     className="px-4 py-2 border border-gray-200 text-gray-500 rounded-lg text-sm">
                     Cancel
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="text-sm text-gray-600">
-                Goal: <span className="font-semibold">${pool.goal.toFixed(0)}</span>
-                {pool.pool_type === 'split' && pool.split_count && (
-                  <span className="ml-3">· Splitting between <span className="font-semibold">{pool.split_count} people</span> (${(pool.goal / pool.split_count).toFixed(0)} each)</span>
+              <div className="text-sm text-gray-600 flex flex-col gap-1">
+                <div>Goal: <span className="font-semibold">${pool.goal.toFixed(0)}</span>
+                  {pool.pool_type === 'split' && pool.split_count && (
+                    <span className="ml-2 text-gray-400">· {pool.split_count} people · ${(pool.goal / pool.split_count).toFixed(0)} each</span>
+                  )}
+                </div>
+                {pool.gift_name && (
+                  <div>Gift: <span className="font-semibold">{pool.gift_name}</span>
+                    {pool.gift_url && <a href={pool.gift_url} target="_blank" rel="noopener noreferrer" className="ml-2 text-[#E8733A] text-xs font-medium">View ↗</a>}
+                  </div>
                 )}
               </div>
             )}
