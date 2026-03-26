@@ -257,9 +257,9 @@ export default function Home() {
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 24, marginTop: 64 }}>
               {[
-                { n: '1', title: 'You create the pool', desc: 'Pick the gift, set the goal, name the occasion. You're in full control — the recipient is never notified and never sees the pool. Their surprise stays safe.' },
+                { n: '1', title: 'You create the pool', desc: "Pick the gift, set the goal, name the occasion. You're in full control — the recipient is never notified and never sees the pool. Their surprise stays safe." },
                 { n: '2', title: 'You share the link privately', desc: 'Send a private link to contributors — friends, family, colleagues. They chip in at their own pace, leave a personal note, and you track progress in real time.' },
-                { n: '3', title: 'You make the moment', desc: 'Once funded, money transfers directly to you. Buy the gift, wrap it up, and watch their face. GroupGifts.me handled the chaos — you get the glory.' },
+                { n: '3', title: 'You make the moment', desc: "Once funded, money transfers directly to you. Buy the gift, wrap it up, and watch their face. GroupGifts.me handled the chaos — you get the glory." },
               ].map(step => (
                 <div key={step.n} className="step-card" style={{ background: '#fff', border: '1px solid #E8E8E8', borderRadius: 14, padding: '32px 28px', boxShadow: '0 2px 16px rgba(0,0,0,0.07)' }}>
                   <div style={{ width: 44, height: 44, borderRadius: 12, background: '#0D0D0D', color: '#fff', fontFamily: SERIF, fontSize: 22, fontStyle: 'italic', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 20 }}>{step.n}</div>
