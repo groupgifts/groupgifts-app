@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 44 44" fill="none">
+  <!-- Orange background circle -->
+  <rect width="44" height="44" rx="10" fill="#E8733A"/>
+  <!-- Gift box body -->
+  <rect x="7" y="26" width="30" height="16" rx="3" fill="white" opacity="0.95"/>
+  <rect x="18" y="26" width="5" height="16" fill="#E8733A" opacity="0.4"/>
+  <!-- Gift box lid -->
+  <rect x="5" y="19" width="34" height="9" rx="3" fill="white" opacity="0.85"/>
+  <rect x="18" y="19" width="5" height="9" fill="#E8733A" opacity="0.3"/>
+  <!-- Bow -->
+  <path d="M22 19 C20 13 13 6 7 8 C3 10 3 15 8 17 C13 19 21 19 22 19Z" fill="white"/>
+  <path d="M22 19 C24 13 31 6 37 8 C41 10 41 15 36 17 C31 19 23 19 22 19Z" fill="white"/>
+  <path d="M20 20 C17 22 13 24 11 27" stroke="white" stroke-width="2.8" stroke-linecap="round"/>
+  <path d="M24 20 C27 22 31 24 33 27" stroke="white" stroke-width="2.8" stroke-linecap="round"/>
+  <circle cx="22" cy="19" r="4" fill="white"/>
+  <circle cx="22" cy="19" r="1.8" fill="#E8733A"/>
+</svg>

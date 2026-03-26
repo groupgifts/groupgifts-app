@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { signOut } from '@/lib/auth'
+import Logo from '@/components/Logo'
 
 export default function Dashboard() {
   const router = useRouter()
@@ -46,9 +47,7 @@ export default function Dashboard() {
   return (
     <main className="min-h-screen bg-[#F4F3F0]">
       <nav className="bg-white border-b border-gray-100 px-6 py-4 flex justify-between items-center">
-        <h1 className="text-xl font-light italic" style={{fontFamily: 'Georgia, serif'}}>
-          GroupGifts<span className="text-[#E8733A]">.me</span>
-        </h1>
+        <Logo />
         <div className="flex items-center gap-4">
           <span className="text-sm text-gray-400">{user?.email}</span>
           <button onClick={handleSignOut} className="text-sm text-gray-400 hover:text-gray-600">Sign out</button>

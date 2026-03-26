@@ -1,10 +1,12 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import Logo from '@/components/Logo'
 
 export default function Contribute() {
   const { slug } = useParams()
+  const searchParams = useSearchParams()
   const [pool, setPool] = useState<any>(null)
   const [contributions, setContributions] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -15,8 +17,13 @@ export default function Contribute() {
   const [message, setMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [showAmounts, setShowAmounts] = useState(false)
+  const [showMyAmount, setShowMyAmount] = useState(false)
 
-  useEffect(() => { loadPool() }, [slug])
+  useEffect(() => {
+    loadPool()
+    if (searchParams.get('success') === '1') setStep('success')
+  }, [slug])
 
   async function loadPool() {
     const { data: poolData } = await supabase
@@ -44,24 +51,16 @@ export default function Contribute() {
     setSubmitting(true)
     setError('')
     try {
-      const { error } = await supabase.from('contributions').insert({
-        pool_id: pool.id,
-        contributor_name: name,
-        contributor_email: email,
-        message: message || null,
-        amount: parseFloat(amount),
-        total_charged: parseFloat(amount),
-        platform_fee: parseFloat(amount) * 0.05,
-        stripe_fee: 0,
-        payment_intent_id: 'test_' + Date.now(),
-        status: 'paid',
-        paid_at: new Date().toISOString(),
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug, name, email, amount, message, showMyAmount }),
       })
-      if (error) throw error
-      setStep('success')
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Checkout failed')
+      window.location.href = data.url
     } catch (err: any) {
       setError(err.message)
-    } finally {
       setSubmitting(false)
     }
   }
@@ -87,12 +86,15 @@ export default function Contribute() {
       <div className="bg-white rounded-2xl p-10 text-center max-w-md w-full border border-gray-100">
         <div className="text-5xl mb-4">🎉</div>
         <h2 className="text-2xl font-light italic mb-2" style={{fontFamily: 'Georgia, serif'}}>You're in!</h2>
-        <p className="text-gray-400 text-sm">Your contribution to <strong>{pool.title}</strong> has been added. Receipt sent to {email}.</p>
-        <div className="mt-6 bg-green-50 rounded-xl p-4">
-          <div className="text-sm text-green-700 font-semibold">Updated progress</div>
-          <div className="h-2 bg-green-100 rounded-full overflow-hidden mt-2">
-            <div className="h-full bg-green-500 rounded-full" style={{width: `${Math.min(100, ((raised + parseFloat(amount)) / pool.goal) * 100)}%`}} />
+        <p className="text-gray-400 text-sm mb-6">
+          Your contribution to <strong>{pool.title}</strong> is confirmed. A receipt is on its way to your email.
+        </p>
+        <div className="bg-green-50 rounded-xl p-4">
+          <div className="text-sm text-green-700 font-semibold mb-2">Pool progress</div>
+          <div className="h-2 bg-green-100 rounded-full overflow-hidden">
+            <div className="h-full bg-green-500 rounded-full" style={{width: `${pct}%`}} />
           </div>
+          <div className="text-xs text-green-600 mt-2">${raised.toFixed(0)} of ${pool.goal} raised</div>
         </div>
       </div>
     </div>
@@ -100,10 +102,8 @@ export default function Contribute() {
 
   return (
     <div className="min-h-screen bg-[#F4F3F0]">
-      <nav className="bg-white border-b border-gray-100 px-6 py-4 text-center">
-        <h1 className="text-xl font-light italic" style={{fontFamily: 'Georgia, serif'}}>
-          GroupGifts<span className="text-[#E8733A]">.me</span>
-        </h1>
+      <nav className="bg-white border-b border-gray-100 px-6 py-4 flex justify-center">
+        <Logo />
       </nav>
 
       <main className="max-w-lg mx-auto px-6 py-10">
@@ -129,7 +129,6 @@ export default function Contribute() {
           <div className="text-sm text-gray-400">{pct}% funded · {contributions.length} contributor{contributions.length !== 1 ? 's' : ''}</div>
         </div>
 
-        {/* Contribute form */}
         {step === 'view' && (
           <div>
             {!done && (
@@ -139,7 +138,6 @@ export default function Contribute() {
               </button>
             )}
 
-            {/* Messages */}
             {contributions.length > 0 && (
               <div className="flex flex-col gap-3 mt-2">
                 <h3 className="font-semibold text-gray-700 text-sm">Already chipped in</h3>
@@ -152,6 +150,9 @@ export default function Contribute() {
                       <div className="text-sm font-semibold text-gray-900">{c.contributor_name}</div>
                       {c.message && <div className="text-xs text-gray-400">"{c.message}"</div>}
                     </div>
+                    {c.show_amount && (
+                      <div className="text-sm font-semibold text-gray-500">${c.amount}</div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -182,7 +183,7 @@ export default function Contribute() {
                 <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Amount (USD)</label>
                 <input type="number" value={amount} onChange={e => setAmount(e.target.value)}
                   className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#E8733A]"
-                  placeholder="e.g. 50" min="25" />
+                  placeholder="e.g. 50" min="1" />
               </div>
               <div>
                 <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Personal message (optional)</label>
@@ -190,6 +191,14 @@ export default function Contribute() {
                   className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#E8733A] resize-none"
                   placeholder="Write something for the recipient..." />
               </div>
+              <label className="flex items-center gap-3 cursor-pointer pt-1">
+                <input type="checkbox" checked={showMyAmount} onChange={e => setShowMyAmount(e.target.checked)}
+                  className="rounded accent-[#E8733A]" />
+                <div>
+                  <div className="text-sm font-medium text-gray-900">Show my contribution amount</div>
+                  <div className="text-xs text-gray-400">Others can see how much you contributed</div>
+                </div>
+              </label>
             </div>
 
             <div className="flex gap-3 mt-6">
@@ -198,9 +207,11 @@ export default function Contribute() {
               </button>
               <button onClick={handleContribute} disabled={submitting || !name || !email || !amount}
                 className="flex-1 bg-[#E8733A] text-white py-3 rounded-xl text-sm font-semibold hover:bg-[#C85E28] transition-colors disabled:opacity-50">
-                {submitting ? 'Processing...' : `Contribute $${amount || '0'} →`}
+                {submitting ? 'Redirecting to payment...' : `Pay $${amount || '0'} →`}
               </button>
             </div>
+
+            <p className="text-xs text-gray-400 text-center mt-3">Secured by Stripe</p>
           </div>
         )}
       </main>

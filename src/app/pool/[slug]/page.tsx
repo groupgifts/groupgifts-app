@@ -4,6 +4,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { supabase } from '@/lib/supabase'
 import { getUser } from '@/lib/auth'
+import Logo from '@/components/Logo'
 
 export default function PoolDetail() {
   const { slug } = useParams()
@@ -13,6 +14,11 @@ export default function PoolDetail() {
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
+  const [refunding, setRefunding] = useState<string | null>(null)
+  const [editing, setEditing] = useState(false)
+  const [editGoal, setEditGoal] = useState('')
+  const [editSplitCount, setEditSplitCount] = useState('')
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     loadPool()
@@ -30,6 +36,8 @@ export default function PoolDetail() {
 
     if (!poolData) { router.push('/dashboard'); return }
     setPool(poolData)
+    setEditGoal(String(poolData.goal))
+    setEditSplitCount(String(poolData.split_count || ''))
 
     const { data: contribs } = await supabase
       .from('contributions')
@@ -40,6 +48,22 @@ export default function PoolDetail() {
 
     setContributions(contribs || [])
     setLoading(false)
+  }
+
+  async function saveEdit() {
+    setSaving(true)
+    const { error } = await supabase.from('pools')
+      .update({
+        goal: parseFloat(editGoal),
+        split_count: pool.pool_type === 'split' ? parseInt(editSplitCount) : pool.split_count,
+      })
+      .eq('id', pool.id)
+      .eq('organiser_id', user.id)
+    if (!error) {
+      setPool({ ...pool, goal: parseFloat(editGoal), split_count: pool.pool_type === 'split' ? parseInt(editSplitCount) : pool.split_count })
+      setEditing(false)
+    }
+    setSaving(false)
   }
 
   function copyLink() {
@@ -63,9 +87,7 @@ export default function PoolDetail() {
       {/* Nav */}
       <nav className="bg-white border-b border-gray-100 px-6 py-4 flex justify-between items-center sticky top-0">
         <Link href="/dashboard" className="text-sm text-gray-400 hover:text-gray-600">← Back</Link>
-        <h1 className="text-xl font-light italic" style={{fontFamily: 'Georgia, serif'}}>
-          GroupGifts<span className="text-[#E8733A]">.me</span>
-        </h1>
+        <Logo />
         <div className="w-16" />
       </nav>
 
@@ -111,6 +133,51 @@ export default function PoolDetail() {
           </div>
         )}
 
+        {/* Edit settings — organiser only */}
+        {user && pool.organiser_id === user.id && pool.status === 'active' && (
+          <div className="bg-white rounded-2xl p-5 mb-6 border border-gray-100">
+            <div className="flex justify-between items-center mb-3">
+              <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Pool settings</div>
+              {!editing && (
+                <button onClick={() => setEditing(true)} className="text-xs text-[#E8733A] font-semibold hover:underline">Edit</button>
+              )}
+            </div>
+            {editing ? (
+              <div className="flex flex-col gap-3">
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Goal amount (USD)</label>
+                  <input type="number" value={editGoal} onChange={e => setEditGoal(e.target.value)}
+                    className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#E8733A]" />
+                </div>
+                {pool.pool_type === 'split' && (
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Number of people splitting</label>
+                    <input type="number" value={editSplitCount} onChange={e => setEditSplitCount(e.target.value)}
+                      className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#E8733A]" />
+                  </div>
+                )}
+                <div className="flex gap-2 mt-1">
+                  <button onClick={saveEdit} disabled={saving || !editGoal}
+                    className="flex-1 bg-[#E8733A] text-white py-2 rounded-lg text-sm font-semibold disabled:opacity-50">
+                    {saving ? 'Saving...' : 'Save changes'}
+                  </button>
+                  <button onClick={() => { setEditing(false); setEditGoal(String(pool.goal)); setEditSplitCount(String(pool.split_count || '')) }}
+                    className="px-4 py-2 border border-gray-200 text-gray-500 rounded-lg text-sm">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="text-sm text-gray-600">
+                Goal: <span className="font-semibold">${pool.goal.toFixed(0)}</span>
+                {pool.pool_type === 'split' && pool.split_count && (
+                  <span className="ml-3">· Splitting between <span className="font-semibold">{pool.split_count} people</span> (${(pool.goal / pool.split_count).toFixed(0)} each)</span>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Share link */}
         <div className="bg-white rounded-2xl p-5 mb-6 border border-gray-100">
           <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Share with contributors</div>
@@ -148,8 +215,34 @@ export default function PoolDetail() {
                 <div className="flex-1">
                   <div className="font-semibold text-sm text-gray-900">{c.contributor_name}</div>
                   {c.message && <div className="text-xs text-gray-400 mt-0.5">"{c.message}"</div>}
+                  {!c.show_amount && <div className="text-xs text-gray-300 mt-0.5">Amount hidden from public</div>}
                 </div>
-                <div className="text-lg font-bold text-[#18B894]">+${c.amount.toFixed(0)}</div>
+                <div className="flex items-center gap-3">
+                  <div className="text-lg font-bold text-[#18B894]">+${c.amount.toFixed(0)}</div>
+                  {user && pool.organiser_id === user.id && (
+                    <button
+                      disabled={refunding === c.id}
+                      onClick={async () => {
+                        if (!confirm(`Refund $${c.amount.toFixed(0)} to ${c.contributor_name}? This cannot be undone.`)) return
+                        setRefunding(c.id)
+                        const res = await fetch('/api/refund', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ contribution_id: c.id, organiser_id: user.id }),
+                        })
+                        if (res.ok) {
+                          setContributions(prev => prev.filter(x => x.id !== c.id))
+                        } else {
+                          const d = await res.json()
+                          alert('Refund failed: ' + d.error)
+                        }
+                        setRefunding(null)
+                      }}
+                      className="text-xs text-gray-400 hover:text-red-500 font-medium transition-colors disabled:opacity-40">
+                      {refunding === c.id ? 'Refunding...' : 'Refund'}
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -159,19 +252,24 @@ export default function PoolDetail() {
           <div className="mt-8 pt-6 border-t border-gray-200">
             <div className="bg-white rounded-2xl p-5 border border-gray-100">
               <div className="text-sm font-semibold text-gray-900 mb-1">Ready to close this pool?</div>
-              <div className="text-xs text-gray-400 mb-4">Once closed, no new contributions can be added. You'll receive the funds within 2 business days.</div>
+              <div className="text-xs text-gray-400 mb-4">
+                Once closed, no new contributions can be added. You'll receive the funds within 2 business days.
+                {pool.recipient_email && ' The recipient will be emailed their digital card.'}
+              </div>
               <button
                 onClick={async () => {
-  if (!confirm('Are you sure you want to close this pool?')) return
-  await supabase
-    .from('pools')
-    .update({ status: 'paid_out', closed_at: new Date().toISOString() })
-    .eq('id', pool.id)
-  router.push(`/card/${pool.slug}`)
-}}                className="w-full bg-[#0D0D0D] text-white py-3 rounded-xl text-sm font-semibold hover:bg-gray-800 transition-colors">
+                  if (!confirm('Are you sure you want to close this pool?')) return
+                  await fetch('/api/close-pool', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pool_id: pool.id, organiser_id: user.id }),
+                  })
+                  setPool({ ...pool, status: 'paid_out' })
+                }}
+                className="w-full bg-[#0D0D0D] text-white py-3 rounded-xl text-sm font-semibold hover:bg-gray-800 transition-colors">
                 Close pool & request payout →
               </button>
-            </div>  
+            </div>
           </div>
         )}
       </main>

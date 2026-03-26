@@ -6,7 +6,9 @@ import { supabase } from '@/lib/supabase'
 export default function DigitalCard() {
   const { slug } = useParams()
   const [pool, setPool] = useState<any>(null)
-  const [contributions, setContributions] = useState<any[]>([])
+  const [messages, setMessages] = useState<any[]>([])
+  const [totalRaised, setTotalRaised] = useState(0)
+  const [totalContributors, setTotalContributors] = useState(0)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => { loadCard() }, [slug])
@@ -28,7 +30,10 @@ export default function DigitalCard() {
       .eq('status', 'paid')
       .order('created_at', { ascending: false })
 
-    setContributions((contribs || []).filter(c => c.message))
+    const all = contribs || []
+    setTotalRaised(all.reduce((sum, c) => sum + c.amount, 0))
+    setTotalContributors(all.length)
+    setMessages(all.filter(c => c.message))
     setLoading(false)
   }
 
@@ -44,9 +49,6 @@ export default function DigitalCard() {
     </div>
   )
 
-  const raised = contributions.reduce((sum, c) => sum + c.amount, 0)
-  const totalContributors = contributions.length
-
   return (
     <div className="min-h-screen py-12 px-6" style={{background: 'linear-gradient(135deg, #1A1A2E, #2D1B4E)'}}>
       <div className="max-w-lg mx-auto">
@@ -61,17 +63,17 @@ export default function DigitalCard() {
             For {pool.recipient} · From {totalContributors} people who love you
           </p>
           <div className="mt-4 inline-flex items-center gap-2 bg-white bg-opacity-10 rounded-full px-4 py-2">
-            <span className="text-white font-semibold">${raised.toFixed(0)}</span>
+            <span className="text-white font-semibold">${totalRaised.toFixed(0)}</span>
             <span className="text-white opacity-50 text-sm">raised together</span>
           </div>
         </div>
 
         {/* Messages */}
-        {contributions.length === 0 ? (
+        {messages.length === 0 ? (
           <div className="text-center text-white opacity-40 text-sm">No messages yet.</div>
         ) : (
           <div className="flex flex-col gap-4">
-            {contributions.map((c, i) => (
+            {messages.map((c, i) => (
               <div key={i} className="rounded-2xl p-5" style={{background: 'rgba(255,255,255,0.07)'}}>
                 <p className="text-white opacity-80 text-sm italic leading-relaxed mb-3">
                   "{c.message}"
