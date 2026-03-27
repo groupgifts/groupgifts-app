@@ -4,6 +4,17 @@ import { useParams, useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import Logo from '@/components/Logo'
 
+const OCCASION_EMOJI: Record<string, string> = {
+  'Birthday': '🎂',
+  'Wedding': '💍',
+  'Baby Shower': '🍼',
+  'Graduation': '🎓',
+  'Anniversary': '💝',
+  'Retirement': '🥂',
+  'Farewell': '✈️',
+  'Celebration': '🎉',
+}
+
 export default function Contribute() {
   const { slug } = useParams()
   const searchParams = useSearchParams()
@@ -110,7 +121,7 @@ export default function Contribute() {
 
         {/* Pool info */}
         <div className="bg-white rounded-2xl p-6 mb-6 border border-gray-100">
-          <div className="text-xs font-semibold text-[#E8733A] uppercase tracking-wide mb-1">{pool.occasion}</div>
+          <div className="text-xs font-semibold text-[#E8733A] uppercase tracking-wide mb-1">{OCCASION_EMOJI[pool.occasion] || '🎁'} {pool.occasion}</div>
           <h2 className="text-2xl font-light italic mb-1" style={{fontFamily: 'Georgia, serif'}}>{pool.title}</h2>
           <p className="text-gray-400 text-sm mb-4">For {pool.recipient}</p>
 

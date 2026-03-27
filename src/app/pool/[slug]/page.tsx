@@ -6,6 +6,17 @@ import { supabase } from '@/lib/supabase'
 import { getUser } from '@/lib/auth'
 import Logo from '@/components/Logo'
 
+const OCCASION_EMOJI: Record<string, string> = {
+  'Birthday': '🎂',
+  'Wedding': '💍',
+  'Baby Shower': '🍼',
+  'Graduation': '🎓',
+  'Anniversary': '💝',
+  'Retirement': '🥂',
+  'Farewell': '✈️',
+  'Celebration': '🎉',
+}
+
 export default function PoolDetail() {
   const { slug } = useParams()
   const router = useRouter()
@@ -109,7 +120,7 @@ export default function PoolDetail() {
         <div className={`rounded-2xl p-6 mb-6 ${done ? 'bg-green-50 border border-green-100' : 'bg-white border border-gray-100'}`}>
           <div className="flex justify-between items-start mb-4">
             <div>
-              <span className="text-xs font-semibold text-[#E8733A] uppercase tracking-wide">{pool.occasion}</span>
+              <span className="text-xs font-semibold text-[#E8733A] uppercase tracking-wide">{OCCASION_EMOJI[pool.occasion] || '🎁'} {pool.occasion}</span>
               <h2 className="text-3xl font-light italic mt-1" style={{fontFamily: 'Georgia, serif'}}>{pool.title}</h2>
               <p className="text-gray-400 text-sm mt-1">For {pool.recipient}{pool.date ? ` · ${pool.date}` : ''}</p>
             </div>
