@@ -202,7 +202,7 @@ export default function Home() {
               <div style={{ padding: 24 }}>
                 <MockCard
                   title="Fernanda's Birthday 🎂"
-                  sub="For Fernanda R. · Birthday · July 14"
+                  sub="For Fernanda R. · Birthday · July 14 · 🛍️ Hermès Earrings"
                   amount="$340"
                   goal="$487"
                   pct={70}
@@ -233,15 +233,15 @@ export default function Home() {
                 <div style={{ marginTop: 12 }}>
                   <MockCard
                     title="Carolina's 50th 🎊"
-                    sub="For Carolina V. · Birthday · Oct 18"
+                    sub="For Carolina V. · 50th Birthday · Oct 18 · 🤝 UNICEF"
                     amount="$1,850"
                     goal="$1,000"
                     pct={100}
                     color="#F06B7A"
                     contributors={['V','T','S']}
                     contributorColors={['#9B6BF0','#2B9BF0','#E8733A']}
-                    label="18 contributors"
-                    badge="🎉 Complete"
+                    label="18 contributors · Charity"
+                    badge="🎉 Overfunded"
                     badgeBg="#FEF0F2"
                     badgeColor="#E8566A"
                   />
