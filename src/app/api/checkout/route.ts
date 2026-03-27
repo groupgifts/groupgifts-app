@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     }
 
     const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card', 'paypal', 'venmo'],
+      automatic_payment_methods: { enabled: true },
       customer_email: email,
       line_items: [
         {
