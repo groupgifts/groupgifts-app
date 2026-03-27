@@ -302,6 +302,30 @@ export default function PoolDetail() {
             </div>
           </div>
         )}
+
+        {/* Delete pool — organiser only */}
+        {user && pool.organiser_id === user.id && (
+          <div className="mt-4 text-center">
+            <button
+              onClick={async () => {
+                if (!confirm('Delete this pool permanently? All contributions will be refunded first. This cannot be undone.')) return
+                const res = await fetch('/api/delete-pool', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ pool_id: pool.id, organiser_id: user.id }),
+                })
+                if (res.ok) {
+                  router.push('/dashboard')
+                } else {
+                  const d = await res.json()
+                  alert('Delete failed: ' + d.error)
+                }
+              }}
+              className="text-xs text-gray-400 hover:text-red-500 font-medium transition-colors">
+              Delete pool
+            </button>
+          </div>
+        )}
       </main>
     </div>
   )
