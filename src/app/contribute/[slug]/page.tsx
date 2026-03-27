@@ -121,7 +121,18 @@ export default function Contribute() {
 
         {/* Pool info */}
         <div className="bg-white rounded-2xl p-6 mb-6 border border-gray-100">
-          <div className="text-xs font-semibold text-[#E8733A] uppercase tracking-wide mb-1">{OCCASION_EMOJI[pool.occasion] || '🎁'} {pool.occasion}</div>
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
+            <span className="text-xs font-semibold text-[#E8733A] uppercase tracking-wide">{OCCASION_EMOJI[pool.occasion] || '🎁'} {pool.occasion}</span>
+            {pool.gift_intent === 'charity' && (
+              <span className="text-xs font-semibold bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full">🤝 Charity donation</span>
+            )}
+            {pool.gift_intent === 'open' && (
+              <span className="text-xs font-semibold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">💰 No specific gift yet</span>
+            )}
+            {(pool.gift_intent === 'specific' || !pool.gift_intent) && (
+              <span className="text-xs font-semibold bg-orange-50 text-[#E8733A] px-2 py-0.5 rounded-full">🎁 Specific gift in mind</span>
+            )}
+          </div>
           <h2 className="text-2xl font-light italic mb-1" style={{fontFamily: 'Georgia, serif'}}>{pool.title}</h2>
           <p className="text-gray-400 text-sm mb-4">For {pool.recipient}</p>
 

@@ -21,6 +21,7 @@ export default function CreatePool() {
   const [poolType, setPoolType] = useState<'split' | 'open'>('open')
   const [splitCount, setSplitCount] = useState('')
   const [goal, setGoal] = useState('')
+  const [giftIntent, setGiftIntent] = useState<'specific' | 'open' | 'charity'>('specific')
   const [giftName, setGiftName] = useState('')
   const [giftUrl, setGiftUrl] = useState('')
   const [showAmountsPublicly, setShowAmountsPublicly] = useState(false)
@@ -45,6 +46,7 @@ export default function CreatePool() {
         pool_type: poolType,
         split_count: poolType === 'split' ? parseInt(splitCount) : null,
         goal: parseFloat(goal),
+        gift_intent: giftIntent,
         gift_name: giftName || null,
         gift_url: giftUrl || null,
         payout_type: 'organiser',
@@ -138,6 +140,24 @@ export default function CreatePool() {
               <p className="text-gray-400 text-sm mb-6">How will people contribute?</p>
 
               <div className="flex flex-col gap-4">
+                {/* Gift intent */}
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">What's the plan for the gift?</label>
+                  <div className="flex flex-col gap-2">
+                    {([
+                      { value: 'specific', icon: '🎁', label: 'I have a gift in mind', desc: 'You know what you want to buy — add a name or link below' },
+                      { value: 'open',     icon: '💰', label: "No specific gift yet",  desc: "You'll decide once the pool closes" },
+                      { value: 'charity',  icon: '🤝', label: 'Charity donation',      desc: "The funds will be donated to a cause they love" },
+                    ] as const).map(opt => (
+                      <div key={opt.value} onClick={() => setGiftIntent(opt.value)}
+                        className={`p-3 rounded-xl border-2 cursor-pointer transition-all ${giftIntent === opt.value ? 'border-[#E8733A] bg-orange-50' : 'border-gray-200'}`}>
+                        <div className={`text-sm font-semibold ${giftIntent === opt.value ? 'text-[#E8733A]' : 'text-gray-700'}`}>{opt.icon} {opt.label}</div>
+                        <div className="text-xs text-gray-400 mt-0.5">{opt.desc}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
                 <div className="flex gap-3">
                   {(['open', 'split'] as const).map(t => (
                     <div key={t} onClick={() => setPoolType(t)}
@@ -163,19 +183,22 @@ export default function CreatePool() {
                     placeholder="e.g. 500" />
                 </div>
 
-                <div>
-                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Gift name (optional)</label>
-                  <input value={giftName} onChange={e => setGiftName(e.target.value)}
-                    className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#E8733A]"
-                    placeholder="e.g. Hermès Earrings" />
-                </div>
-
-                <div>
-                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Product URL (optional)</label>
-                  <input value={giftUrl} onChange={e => setGiftUrl(e.target.value)}
-                    className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#E8733A]"
-                    placeholder="https://..." />
-                </div>
+                {giftIntent === 'specific' && (
+                  <>
+                    <div>
+                      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Gift name (optional)</label>
+                      <input value={giftName} onChange={e => setGiftName(e.target.value)}
+                        className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#E8733A]"
+                        placeholder="e.g. Hermès Earrings" />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Product URL (optional)</label>
+                      <input value={giftUrl} onChange={e => setGiftUrl(e.target.value)}
+                        className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#E8733A]"
+                        placeholder="https://..." />
+                    </div>
+                  </>
+                )}
               </div>
 
               {/* Privacy */}

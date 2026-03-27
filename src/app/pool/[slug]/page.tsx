@@ -120,7 +120,18 @@ export default function PoolDetail() {
         <div className={`rounded-2xl p-6 mb-6 ${done ? 'bg-green-50 border border-green-100' : 'bg-white border border-gray-100'}`}>
           <div className="flex justify-between items-start mb-4">
             <div>
-              <span className="text-xs font-semibold text-[#E8733A] uppercase tracking-wide">{OCCASION_EMOJI[pool.occasion] || '🎁'} {pool.occasion}</span>
+              <div className="flex items-center gap-2 flex-wrap mb-1">
+                <span className="text-xs font-semibold text-[#E8733A] uppercase tracking-wide">{OCCASION_EMOJI[pool.occasion] || '🎁'} {pool.occasion}</span>
+                {pool.gift_intent === 'charity' && (
+                  <span className="text-xs font-semibold bg-purple-50 text-purple-600 px-2 py-0.5 rounded-full">🤝 Charity donation</span>
+                )}
+                {pool.gift_intent === 'open' && (
+                  <span className="text-xs font-semibold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">💰 No specific gift yet</span>
+                )}
+                {(pool.gift_intent === 'specific' || !pool.gift_intent) && (
+                  <span className="text-xs font-semibold bg-orange-50 text-[#E8733A] px-2 py-0.5 rounded-full">🎁 Specific gift</span>
+                )}
+              </div>
               <h2 className="text-3xl font-light italic mt-1" style={{fontFamily: 'Georgia, serif'}}>{pool.title}</h2>
               <p className="text-gray-400 text-sm mt-1">For {pool.recipient}{pool.date ? ` · ${pool.date}` : ''}</p>
             </div>
