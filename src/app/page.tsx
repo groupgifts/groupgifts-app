@@ -428,12 +428,12 @@ function MockCard({ title, sub, amount, goal, pct, color, contributors, contribu
 }) {
   return (
     <div style={{ border: '1px solid #E8E8E8', borderRadius: 14, padding: '18px 20px', background: '#fff' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
-        <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12, gap: 8 }}>
+        <div style={{ minWidth: 0 }}>
           <div style={{ fontSize: 15, fontWeight: 600, color: '#0D0D0D', marginBottom: 4 }}>{title}</div>
-          <div style={{ fontSize: 12, color: '#888' }}>{sub}</div>
+          <div style={{ fontSize: 12, color: '#888', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{sub}</div>
         </div>
-        <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 8, background: badgeBg, color: badgeColor, whiteSpace: 'nowrap' }}>{badge}</span>
+        <span style={{ fontSize: 11, fontWeight: 600, padding: '3px 10px', borderRadius: 8, background: badgeBg, color: badgeColor, whiteSpace: 'nowrap', flexShrink: 0 }}>{badge}</span>
       </div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 8 }}>
         <div>
