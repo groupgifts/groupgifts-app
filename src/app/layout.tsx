@@ -15,6 +15,21 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "GroupGifts.me — Group gifting made easy",
   description: "Pool money with friends and family to give the perfect gift together.",
+  metadataBase: new URL("https://groupgifts.me"),
+  openGraph: {
+    title: "GroupGifts.me — Group gifting made easy",
+    description: "Pool money with friends and family. Pick the perfect gift, keep it a surprise.",
+    url: "https://groupgifts.me",
+    siteName: "GroupGifts.me",
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }],
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "GroupGifts.me",
+    description: "Pool money with friends and family. Pick the perfect gift, keep it a surprise.",
+    images: ["/og-image.png"],
+  },
 };
 
 export default function RootLayout({
