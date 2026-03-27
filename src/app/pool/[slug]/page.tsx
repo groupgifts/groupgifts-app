@@ -28,6 +28,7 @@ export default function PoolDetail() {
   const [refunding, setRefunding] = useState<string | null>(null)
   const [editing, setEditing] = useState(false)
   const [editGoal, setEditGoal] = useState('')
+  const [editPoolType, setEditPoolType] = useState<'open' | 'split'>('open')
   const [editSplitCount, setEditSplitCount] = useState('')
   const [editGiftName, setEditGiftName] = useState('')
   const [editGiftUrl, setEditGiftUrl] = useState('')
@@ -50,6 +51,7 @@ export default function PoolDetail() {
     if (!poolData) { router.push('/dashboard'); return }
     setPool(poolData)
     setEditGoal(String(poolData.goal))
+    setEditPoolType(poolData.pool_type || 'open')
     setEditSplitCount(String(poolData.split_count || ''))
     setEditGiftName(poolData.gift_name || '')
     setEditGiftUrl(poolData.gift_url || '')
@@ -70,7 +72,8 @@ export default function PoolDetail() {
     const { error } = await supabase.from('pools')
       .update({
         goal: parseFloat(editGoal),
-        split_count: pool.pool_type === 'split' ? parseInt(editSplitCount) : pool.split_count,
+        pool_type: editPoolType,
+        split_count: editPoolType === 'split' ? parseInt(editSplitCount) : null,
         gift_name: editGiftName || null,
         gift_url: editGiftUrl || null,
       })
@@ -80,7 +83,8 @@ export default function PoolDetail() {
       setPool({
         ...pool,
         goal: parseFloat(editGoal),
-        split_count: pool.pool_type === 'split' ? parseInt(editSplitCount) : pool.split_count,
+        pool_type: editPoolType,
+        split_count: editPoolType === 'split' ? parseInt(editSplitCount) : null,
         gift_name: editGiftName || null,
         gift_url: editGiftUrl || null,
       })
@@ -179,11 +183,22 @@ export default function PoolDetail() {
             {editing ? (
               <div className="flex flex-col gap-3">
                 <div>
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">Contribution type</label>
+                  <div className="flex gap-2">
+                    {(['open', 'split'] as const).map(t => (
+                      <div key={t} onClick={() => setEditPoolType(t)}
+                        className={`flex-1 p-3 rounded-xl border-2 cursor-pointer text-center text-sm font-semibold transition-all ${editPoolType === t ? 'border-[#E8733A] bg-orange-50 text-[#E8733A]' : 'border-gray-200 text-gray-500'}`}>
+                        {t === 'open' ? '🎁 Open contributions' : '🎯 Split evenly'}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div>
                   <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Goal amount (USD)</label>
                   <input type="number" value={editGoal} onChange={e => setEditGoal(e.target.value)}
                     className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#E8733A]" />
                 </div>
-                {pool.pool_type === 'split' && (
+                {editPoolType === 'split' && (
                   <div>
                     <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Number of people splitting</label>
                     <input type="number" value={editSplitCount} onChange={e => setEditSplitCount(e.target.value)}
@@ -207,7 +222,7 @@ export default function PoolDetail() {
                     className="flex-1 bg-[#E8733A] text-white py-2 rounded-lg text-sm font-semibold disabled:opacity-50">
                     {saving ? 'Saving...' : 'Save changes'}
                   </button>
-                  <button onClick={() => { setEditing(false); setEditGoal(String(pool.goal)); setEditSplitCount(String(pool.split_count || '')); setEditGiftName(pool.gift_name || ''); setEditGiftUrl(pool.gift_url || '') }}
+                  <button onClick={() => { setEditing(false); setEditGoal(String(pool.goal)); setEditPoolType(pool.pool_type || 'open'); setEditSplitCount(String(pool.split_count || '')); setEditGiftName(pool.gift_name || ''); setEditGiftUrl(pool.gift_url || '') }}
                     className="px-4 py-2 border border-gray-200 text-gray-500 rounded-lg text-sm">
                     Cancel
                   </button>
@@ -215,7 +230,10 @@ export default function PoolDetail() {
               </div>
             ) : (
               <div className="text-sm text-gray-600 flex flex-col gap-1">
-                <div>Goal: <span className="font-semibold">${pool.goal.toFixed(0)}</span>
+                <div>
+                  <span className="font-semibold">{pool.pool_type === 'split' ? '🎯 Split evenly' : '🎁 Open contributions'}</span>
+                  <span className="mx-2 text-gray-300">·</span>
+                  Goal: <span className="font-semibold">${pool.goal.toFixed(0)}</span>
                   {pool.pool_type === 'split' && pool.split_count && (
                     <span className="ml-2 text-gray-400">· {pool.split_count} people · ${(pool.goal / pool.split_count).toFixed(0)} each</span>
                   )}
