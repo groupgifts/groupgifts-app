@@ -144,7 +144,10 @@ export default function Contribute() {
           )}
 
           {pool.hide_total ? (
-            <div className="text-sm text-gray-400">{contributions.length} contributor{contributions.length !== 1 ? 's' : ''} so far</div>
+            <div className="flex flex-col gap-1">
+              <div className="text-sm text-gray-400">{contributions.length} contributor{contributions.length !== 1 ? 's' : ''} so far</div>
+              <div className="text-xs text-gray-400 bg-gray-50 rounded-lg px-3 py-2 mt-1">🔒 The organiser has kept the total private</div>
+            </div>
           ) : (
             <>
               <div className="text-3xl font-bold mb-1">${raised.toFixed(0)}</div>
