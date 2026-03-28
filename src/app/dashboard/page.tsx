@@ -38,11 +38,18 @@ export default function Dashboard() {
       .filter((c: any) => c.status === 'paid')
       .reduce((sum: number, c: any) => sum + c.amount, 0)
 
+  const getContributorCount = (pool: any) =>
+    (pool.contributions || []).filter((c: any) => c.status === 'paid').length
+
   if (loading) return (
     <main className="min-h-screen bg-[#F4F3F0] flex items-center justify-center">
       <p className="text-gray-400">Loading...</p>
     </main>
   )
+
+  const totalRaised = pools.reduce((sum, p) => sum + getRaised(p), 0)
+  const totalContributors = pools.reduce((sum, p) => sum + getContributorCount(p), 0)
+  const activePools = pools.filter(p => p.status === 'active').length
 
   return (
     <main className="min-h-screen bg-[#F4F3F0]">
@@ -55,7 +62,26 @@ export default function Dashboard() {
       </nav>
 
       <div className="max-w-3xl mx-auto px-6 py-10">
-        <div className="flex justify-between items-center mb-8">
+
+        {/* Summary stats */}
+        {pools.length > 0 && (
+          <div className="grid grid-cols-3 gap-4 mb-8">
+            <div className="bg-white rounded-2xl p-5 border border-gray-100 text-center">
+              <div className="text-2xl font-bold text-[#E8733A]">${totalRaised.toFixed(0)}</div>
+              <div className="text-xs text-gray-400 mt-1">Total raised</div>
+            </div>
+            <div className="bg-white rounded-2xl p-5 border border-gray-100 text-center">
+              <div className="text-2xl font-bold text-gray-900">{totalContributors}</div>
+              <div className="text-xs text-gray-400 mt-1">Contributors</div>
+            </div>
+            <div className="bg-white rounded-2xl p-5 border border-gray-100 text-center">
+              <div className="text-2xl font-bold text-gray-900">{activePools}</div>
+              <div className="text-xs text-gray-400 mt-1">Active pools</div>
+            </div>
+          </div>
+        )}
+
+        <div className="flex justify-between items-center mb-6">
           <div>
             <h2 className="text-3xl font-light italic" style={{fontFamily: 'Georgia, serif'}}>Your pools</h2>
             <p className="text-gray-400 text-sm mt-1">{pools.length} pool{pools.length !== 1 ? 's' : ''}</p>
@@ -81,22 +107,27 @@ export default function Dashboard() {
             const raised = getRaised(pool)
             const pct = pool.goal > 0 ? Math.min(100, Math.round((raised / pool.goal) * 100)) : 0
             const done = pct >= 100
+            const contribCount = getContributorCount(pool)
+            const statusLabel = pool.status === 'active' ? null : pool.status === 'paid_out' ? 'Paid out' : 'Closed'
             return (
-<Link href={`/pool/${pool.slug}`} key={pool.id} className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-md transition-shadow">
+              <Link href={`/pool/${pool.slug}`} key={pool.id} className="bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-md transition-shadow">
                 <div className="flex justify-between items-start mb-3">
                   <div>
                     <h3 className="font-semibold text-gray-900">{pool.title}</h3>
                     <p className="text-sm text-gray-400 mt-0.5">For {pool.recipient} · {pool.occasion}</p>
                   </div>
-                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${done ? 'bg-green-50 text-green-600' : 'bg-orange-50 text-[#E8733A]'}`}>
-                    {done ? '🎉 Complete' : `${pct}%`}
+                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap ${
+                    statusLabel ? 'bg-gray-100 text-gray-500' :
+                    done ? 'bg-green-50 text-green-600' : 'bg-orange-50 text-[#E8733A]'
+                  }`}>
+                    {statusLabel || (done ? '🎉 Complete' : `${pct}%`)}
                   </span>
                 </div>
                 <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden mb-3">
                   <div className="h-full rounded-full transition-all" style={{width: `${pct}%`, background: done ? '#18B894' : '#E8733A'}} />
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">{(pool.contributions || []).filter((c:any) => c.status === 'paid').length} contributors</span>
+                  <span className="text-gray-400">{contribCount} contributor{contribCount !== 1 ? 's' : ''}</span>
                   <span className="font-semibold text-gray-900">${raised.toFixed(0)} <span className="font-normal text-gray-400">/ ${pool.goal}</span></span>
                 </div>
               </Link>
