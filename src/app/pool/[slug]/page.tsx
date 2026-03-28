@@ -32,6 +32,7 @@ export default function PoolDetail() {
   const [editSplitCount, setEditSplitCount] = useState('')
   const [editGiftName, setEditGiftName] = useState('')
   const [editGiftUrl, setEditGiftUrl] = useState('')
+  const [editHideTotal, setEditHideTotal] = useState(false)
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
@@ -55,6 +56,7 @@ export default function PoolDetail() {
     setEditSplitCount(String(poolData.split_count || ''))
     setEditGiftName(poolData.gift_name || '')
     setEditGiftUrl(poolData.gift_url || '')
+    setEditHideTotal(poolData.hide_total || false)
 
     const { data: contribs } = await supabase
       .from('contributions')
@@ -76,6 +78,7 @@ export default function PoolDetail() {
         split_count: editPoolType === 'split' ? parseInt(editSplitCount) : null,
         gift_name: editGiftName || null,
         gift_url: editGiftUrl || null,
+        hide_total: editHideTotal,
       })
       .eq('id', pool.id)
       .eq('organiser_id', user.id)
@@ -87,6 +90,7 @@ export default function PoolDetail() {
         split_count: editPoolType === 'split' ? parseInt(editSplitCount) : null,
         gift_name: editGiftName || null,
         gift_url: editGiftUrl || null,
+        hide_total: editHideTotal,
       })
       setEditing(false)
     }
@@ -217,6 +221,16 @@ export default function PoolDetail() {
                     className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#E8733A]"
                     placeholder="https://..." />
                 </div>
+                <label className="flex items-center justify-between cursor-pointer pt-1">
+                  <div>
+                    <div className="text-sm font-medium text-gray-900">Hide total from contributors</div>
+                    <div className="text-xs text-gray-400">Contributors won't see the progress bar or total raised</div>
+                  </div>
+                  <div onClick={() => setEditHideTotal(!editHideTotal)}
+                    className={`relative w-10 h-6 rounded-full transition-colors ${editHideTotal ? 'bg-[#E8733A]' : 'bg-gray-200'}`}>
+                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${editHideTotal ? 'translate-x-5' : 'translate-x-1'}`} />
+                  </div>
+                </label>
                 <div className="flex gap-2 mt-1">
                   <button onClick={saveEdit} disabled={saving || !editGoal}
                     className="flex-1 bg-[#E8733A] text-white py-2 rounded-lg text-sm font-semibold disabled:opacity-50">
@@ -242,6 +256,9 @@ export default function PoolDetail() {
                   <div>Gift: <span className="font-semibold">{pool.gift_name}</span>
                     {pool.gift_url && <a href={pool.gift_url} target="_blank" rel="noopener noreferrer" className="ml-2 text-[#E8733A] text-xs font-medium">View ↗</a>}
                   </div>
+                )}
+                {pool.hide_total && (
+                  <div className="text-xs text-gray-400">🙈 Total hidden from contributors</div>
                 )}
               </div>
             )}

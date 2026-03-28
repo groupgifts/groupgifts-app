@@ -143,12 +143,18 @@ export default function Contribute() {
             </div>
           )}
 
-          <div className="text-3xl font-bold mb-1">${raised.toFixed(0)}</div>
-          <div className="text-sm text-gray-400 mb-3">of ${pool.goal} goal</div>
-          <div className="h-2 bg-gray-100 rounded-full overflow-hidden mb-2">
-            <div className="h-full rounded-full" style={{width: `${pct}%`, background: done ? '#18B894' : '#E8733A'}} />
-          </div>
-          <div className="text-sm text-gray-400">{pct}% funded · {contributions.length} contributor{contributions.length !== 1 ? 's' : ''}</div>
+          {pool.hide_total ? (
+            <div className="text-sm text-gray-400">{contributions.length} contributor{contributions.length !== 1 ? 's' : ''} so far</div>
+          ) : (
+            <>
+              <div className="text-3xl font-bold mb-1">${raised.toFixed(0)}</div>
+              <div className="text-sm text-gray-400 mb-3">of ${pool.goal} goal</div>
+              <div className="h-2 bg-gray-100 rounded-full overflow-hidden mb-2">
+                <div className="h-full rounded-full" style={{width: `${pct}%`, background: done ? '#18B894' : '#E8733A'}} />
+              </div>
+              <div className="text-sm text-gray-400">{pct}% funded · {contributions.length} contributor{contributions.length !== 1 ? 's' : ''}</div>
+            </>
+          )}
         </div>
 
         {step === 'view' && (
