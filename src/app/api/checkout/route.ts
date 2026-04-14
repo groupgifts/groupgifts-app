@@ -29,8 +29,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Pool not found' }, { status: 404 })
     }
 
-    const session = await (stripe.checkout.sessions.create as any)({
-      automatic_payment_methods: { enabled: true },
+    const session = await stripe.checkout.sessions.create({
       customer_email: email,
       line_items: [
         {
