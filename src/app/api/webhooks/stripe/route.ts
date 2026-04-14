@@ -51,6 +51,7 @@ export async function POST(req: NextRequest) {
     const platformFee = parseFloat((amountNum * 0.05).toFixed(2))
 
     const db = createServiceRoleClient()
+    console.log('Service role key prefix:', process.env.SUPABASE_SERVICE_ROLE_KEY?.substring(0, 15))
 
     // Insert the contribution
     const { error: insertError } = await db.from('contributions').insert({
