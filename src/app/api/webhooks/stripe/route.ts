@@ -69,8 +69,8 @@ export async function POST(req: NextRequest) {
     })
 
     if (insertError) {
-      console.error('Failed to insert contribution:', insertError)
-      return NextResponse.json({ error: 'DB insert failed' }, { status: 500 })
+      console.error('Failed to insert contribution:', JSON.stringify(insertError))
+      return NextResponse.json({ error: 'DB insert failed', detail: insertError.message, code: insertError.code }, { status: 500 })
     }
 
     // Get updated total for organiser notification
