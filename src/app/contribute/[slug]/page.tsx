@@ -31,6 +31,8 @@ export default function Contribute() {
   const [showAmounts, setShowAmounts] = useState(false)
   const [showMyAmount, setShowMyAmount] = useState(false)
 
+  const myAmount = parseFloat(searchParams.get('amount') || '0')
+
   useEffect(() => {
     loadPool()
     if (searchParams.get('success') === '1') setStep('success')
@@ -101,11 +103,8 @@ export default function Contribute() {
           Your contribution to <strong>{pool.title}</strong> is confirmed. A receipt is on its way to your email.
         </p>
         <div className="bg-green-50 rounded-xl p-4">
-          <div className="text-sm text-green-700 font-semibold mb-2">Pool progress</div>
-          <div className="h-2 bg-green-100 rounded-full overflow-hidden">
-            <div className="h-full bg-green-500 rounded-full" style={{width: `${pct}%`}} />
-          </div>
-          <div className="text-xs text-green-600 mt-2">${raised.toFixed(0)} of ${pool.goal} raised</div>
+          <div className="text-sm text-green-700 font-semibold mb-2">Your contribution</div>
+          <div className="text-2xl font-bold text-green-600">${myAmount.toFixed(0)}</div>
         </div>
       </div>
     </div>

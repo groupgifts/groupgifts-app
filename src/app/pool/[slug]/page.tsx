@@ -23,6 +23,7 @@ export default function PoolDetail() {
   const [pool, setPool] = useState<any>(null)
   const [contributions, setContributions] = useState<any[]>([])
   const [user, setUser] = useState<any>(null)
+  const [accessToken, setAccessToken] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState(false)
   const [refunding, setRefunding] = useState<string | null>(null)
@@ -42,6 +43,8 @@ export default function PoolDetail() {
   async function loadPool() {
     const u = await getUser()
     setUser(u)
+    const { data: { session } } = await supabase.auth.getSession()
+    setAccessToken(session?.access_token ?? null)
 
     const { data: poolData } = await supabase
       .from('pools')
@@ -314,8 +317,8 @@ export default function PoolDetail() {
                         setRefunding(c.id)
                         const res = await fetch('/api/refund', {
                           method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({ contribution_id: c.id, organiser_id: user.id }),
+                          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` },
+                          body: JSON.stringify({ contribution_id: c.id }),
                         })
                         if (res.ok) {
                           setContributions(prev => prev.filter(x => x.id !== c.id))
@@ -348,8 +351,8 @@ export default function PoolDetail() {
                   if (!confirm('Are you sure you want to close this pool?')) return
                   await fetch('/api/close-pool', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ pool_id: pool.id, organiser_id: user.id }),
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` },
+                    body: JSON.stringify({ pool_id: pool.id }),
                   })
                   setPool({ ...pool, status: 'paid_out' })
                 }}
@@ -368,8 +371,8 @@ export default function PoolDetail() {
                 if (!confirm('Delete this pool permanently? All contributions will be refunded first. This cannot be undone.')) return
                 const res = await fetch('/api/delete-pool', {
                   method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ pool_id: pool.id, organiser_id: user.id }),
+                  headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` },
+                  body: JSON.stringify({ pool_id: pool.id }),
                 })
                 if (res.ok) {
                   router.push('/dashboard')

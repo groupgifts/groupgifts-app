@@ -4,19 +4,23 @@ import { sendRecipientCard } from '@/lib/email'
 
 export async function POST(req: NextRequest) {
   try {
-    const { pool_id, organiser_id } = await req.json()
-    if (!pool_id || !organiser_id) {
-      return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
-    }
+    const token = req.headers.get('authorization')?.replace('Bearer ', '')
+    if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const db = createServiceRoleClient()
+
+    const { data: { user }, error: authError } = await db.auth.getUser(token)
+    if (authError || !user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const { pool_id } = await req.json()
+    if (!pool_id) return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
 
     // Verify organiser owns this pool
     const { data: pool } = await db
       .from('pools')
       .select('*')
       .eq('id', pool_id)
-      .eq('organiser_id', organiser_id)
+      .eq('organiser_id', user.id)
       .single()
 
     if (!pool) return NextResponse.json({ error: 'Not found' }, { status: 404 })

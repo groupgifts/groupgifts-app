@@ -93,17 +93,13 @@ export async function POST(req: NextRequest) {
         slug: pool_slug,
       }),
       (async () => {
-        // Look up organiser email
-        const { data: organiser } = await db
-          .from('organisers')
-          .select('email, name')
-          .eq('id', organiser_id)
-          .single()
+        // Look up organiser email via auth admin API
+        const { data: { user: organiser } } = await db.auth.admin.getUserById(organiser_id)
 
         if (organiser?.email) {
           await sendOrganiserNotification({
             to: organiser.email,
-            organiserName: organiser.name ?? '',
+            organiserName: organiser.user_metadata?.name ?? organiser.email,
             contributorName: contributor_name,
             amount: amountNum,
             poolTitle: pool_title,

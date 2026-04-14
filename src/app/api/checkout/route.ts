@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
         recipient: pool.recipient,
         goal: pool.goal.toString(),
       },
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/contribute/${slug}?success=1`,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/contribute/${slug}?success=1&amount=${amountNum}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/contribute/${slug}`,
     })
 
