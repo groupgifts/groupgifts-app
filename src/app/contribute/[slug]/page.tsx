@@ -245,6 +245,27 @@ export default function Contribute() {
                   <div className="text-xs text-gray-400">Others can see how much you contributed</div>
                 </div>
               </label>
+
+              {/* Fee breakdown */}
+              {amount && parseFloat(amount) >= 1 && (() => {
+                const a = parseFloat(amount)
+                const platformFee = Math.round(a * 0.05 * 100) / 100
+                const grossTotal = Math.ceil(((a + platformFee + 0.30) / (1 - 0.029)) * 100) / 100
+                const serviceFee = Math.round((grossTotal - a) * 100) / 100
+                return (
+                  <div className="bg-gray-50 rounded-xl p-3 text-sm">
+                    <div className="flex justify-between text-gray-500 mb-1">
+                      <span>Contribution</span><span>${a.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-gray-500 mb-2">
+                      <span>Service fee</span><span>${serviceFee.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between font-semibold text-gray-900 border-t border-gray-200 pt-2">
+                      <span>You pay</span><span>${grossTotal.toFixed(2)}</span>
+                    </div>
+                  </div>
+                )
+              })()}
             </div>
 
             <div className="flex gap-3 mt-6">
@@ -253,7 +274,9 @@ export default function Contribute() {
               </button>
               <button onClick={handleContribute} disabled={submitting || !name || !email || !amount}
                 className="flex-1 bg-[#E8733A] text-white py-3 rounded-xl text-sm font-semibold hover:bg-[#C85E28] transition-colors disabled:opacity-50">
-                {submitting ? 'Redirecting to payment...' : `Pay $${amount || '0'} →`}
+                {submitting ? 'Redirecting to payment...' : amount && parseFloat(amount) >= 1
+                  ? `Pay $${Math.ceil(((parseFloat(amount) * 1.05 + 0.30) / (1 - 0.029)) * 100) / 100} →`
+                  : 'Pay →'}
               </button>
             </div>
 

@@ -29,6 +29,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Pool not found' }, { status: 404 })
     }
 
+    // Calculate fees so contributor covers everything
+    // Platform fee: 5% of contribution
+    // Stripe fee: 2.9% of total + $0.30 — gross up so net = contribution + platform fee
+    const platformFee = Math.round(amountNum * 0.05 * 100) / 100
+    const grossTotal = Math.ceil(((amountNum + platformFee + 0.30) / (1 - 0.029)) * 100) / 100
+    const serviceFee = Math.round((grossTotal - amountNum) * 100) / 100
+
     const session = await stripe.checkout.sessions.create({
       customer_email: email,
       line_items: [
@@ -40,6 +47,17 @@ export async function POST(req: NextRequest) {
               description: `Group gift for ${pool.recipient}`,
             },
             unit_amount: Math.round(amountNum * 100),
+          },
+          quantity: 1,
+        },
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: 'Service fee',
+              description: '5% platform fee + payment processing',
+            },
+            unit_amount: Math.round(serviceFee * 100),
           },
           quantity: 1,
         },
@@ -62,7 +80,7 @@ export async function POST(req: NextRequest) {
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/contribute/${slug}`,
     })
 
-    return NextResponse.json({ url: session.url })
+    return NextResponse.json({ url: session.url, serviceFee })
   } catch (err: any) {
     console.error('Checkout error:', err)
     return NextResponse.json({ error: err.message }, { status: 500 })
