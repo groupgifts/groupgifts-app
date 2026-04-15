@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createServiceRoleClient } from '@/lib/supabase-server'
+import { sendRefundNotification } from '@/lib/email'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
@@ -20,7 +21,7 @@ export async function POST(req: NextRequest) {
     // Fetch contribution + verify organiser owns the pool
     const { data: contribution } = await db
       .from('contributions')
-      .select('*, pools(organiser_id, title)')
+      .select('*, pools(organiser_id, title, slug)')
       .eq('id', contribution_id)
       .eq('status', 'paid')
       .single()
@@ -42,6 +43,16 @@ export async function POST(req: NextRequest) {
     await db.from('contributions')
       .update({ status: 'refunded' })
       .eq('id', contribution_id)
+
+    // Email the contributor
+    if (contribution.contributor_email) {
+      await sendRefundNotification({
+        to: contribution.contributor_email,
+        contributorName: contribution.contributor_name,
+        amount: contribution.amount,
+        poolTitle: contribution.pools.title,
+      }).catch(err => console.error('Failed to send refund email:', err))
+    }
 
     return NextResponse.json({ ok: true })
   } catch (err: any) {

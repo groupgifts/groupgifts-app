@@ -92,6 +92,42 @@ export async function sendRecipientCard({
   })
 }
 
+export async function sendRefundNotification({
+  to,
+  contributorName,
+  amount,
+  poolTitle,
+}: {
+  to: string
+  contributorName: string
+  amount: number
+  poolTitle: string
+}) {
+  await resend.emails.send({
+    from: FROM,
+    to,
+    subject: `Your refund for ${poolTitle} is on its way`,
+    html: `
+      <div style="font-family: Georgia, serif; max-width: 520px; margin: 0 auto; padding: 40px 24px; color: #1a1a1a;">
+        <div style="font-size: 32px; margin-bottom: 16px;">💸</div>
+        <h1 style="font-size: 24px; font-weight: 300; font-style: italic; margin: 0 0 8px;">Refund confirmed, ${contributorName}</h1>
+        <p style="color: #888; font-size: 14px; margin: 0 0 32px;">Your contribution to <strong>${poolTitle}</strong> has been refunded. The amount will appear back on your original payment method within 5–10 business days.</p>
+
+        <div style="background: #F4F3F0; border-radius: 12px; padding: 20px; margin-bottom: 32px;">
+          <div style="font-size: 13px; color: #888; margin-bottom: 4px;">Refund amount</div>
+          <div style="font-size: 22px; font-weight: 700; color: #1a1a1a;">$${amount.toFixed(2)}</div>
+          <div style="font-size: 13px; color: #888; margin-top: 12px; margin-bottom: 4px;">Pool</div>
+          <div style="font-size: 16px; font-weight: 600;">${poolTitle}</div>
+        </div>
+
+        <p style="font-size: 13px; color: #aaa; text-align: center;">
+          Made with <a href="https://groupgifts.me" style="color: #E8733A; text-decoration: none;">GroupGifts.me</a>
+        </p>
+      </div>
+    `,
+  })
+}
+
 export async function sendOrganiserNotification({
   to,
   organiserName,
