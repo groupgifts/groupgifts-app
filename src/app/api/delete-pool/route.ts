@@ -17,6 +17,8 @@ export async function POST(req: NextRequest) {
     const { pool_id } = await req.json()
     if (!pool_id) return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
 
+    console.log('delete-pool: user.id=', user.id, 'pool_id=', pool_id)
+
     // Verify organiser owns this pool
     const { data: pool } = await db
       .from('pools')
