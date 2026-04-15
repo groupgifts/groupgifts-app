@@ -51,7 +51,6 @@ export async function POST(req: NextRequest) {
     const platformFee = parseFloat((amountNum * 0.05).toFixed(2))
 
     const db = createServiceRoleClient()
-    console.log('Service role key prefix:', process.env.SUPABASE_SERVICE_ROLE_KEY?.substring(0, 15))
 
     // Insert the contribution
     const { error: insertError } = await db.from('contributions').insert({
@@ -84,7 +83,7 @@ export async function POST(req: NextRequest) {
     const totalRaised = (contribs ?? []).reduce((sum, c) => sum + c.amount, 0)
 
     // Send emails (don't fail the webhook if emails fail)
-    await Promise.allSettled([
+    const emailResults = await Promise.allSettled([
       sendContributorReceipt({
         to: contributor_email,
         contributorName: contributor_name,
@@ -111,6 +110,9 @@ export async function POST(req: NextRequest) {
         }
       })(),
     ])
+    emailResults.forEach((r, i) => {
+      if (r.status === 'rejected') console.error(`Email ${i} failed:`, r.reason)
+    })
   }
 
   return NextResponse.json({ received: true })

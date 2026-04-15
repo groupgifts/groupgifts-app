@@ -162,10 +162,18 @@ export default function Contribute() {
         {step === 'view' && (
           <div>
             {!done && (
-              <button onClick={() => setStep('contribute')}
-                className="w-full bg-[#E8733A] text-white py-4 rounded-xl font-semibold text-base hover:bg-[#C85E28] transition-colors mb-3">
-                Chip in →
-              </button>
+              <>
+                <button onClick={() => setStep('contribute')}
+                  className="w-full bg-[#E8733A] text-white py-4 rounded-xl font-semibold text-base hover:bg-[#C85E28] transition-colors mb-3">
+                  Chip in →
+                </button>
+                <div className="flex items-start gap-2 bg-orange-50 rounded-xl px-4 py-3 mb-3">
+                  <span className="text-base flex-shrink-0">💳</span>
+                  <p className="text-xs text-gray-500">
+                    The organiser collects all contributions and coordinates the gift purchase — your money goes directly to them to buy the gift.
+                  </p>
+                </div>
+              </>
             )}
             {/* WhatsApp share */}
             <a

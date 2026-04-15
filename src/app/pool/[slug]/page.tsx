@@ -349,12 +349,17 @@ export default function PoolDetail() {
               <button
                 onClick={async () => {
                   if (!confirm('Are you sure you want to close this pool?')) return
-                  await fetch('/api/close-pool', {
+                  const res = await fetch('/api/close-pool', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${accessToken}` },
                     body: JSON.stringify({ pool_id: pool.id }),
                   })
-                  setPool({ ...pool, status: 'paid_out' })
+                  if (res.ok) {
+                    setPool({ ...pool, status: 'paid_out' })
+                  } else {
+                    const d = await res.json()
+                    alert('Failed to close pool: ' + d.error)
+                  }
                 }}
                 className="w-full bg-[#0D0D0D] text-white py-3 rounded-xl text-sm font-semibold hover:bg-gray-800 transition-colors">
                 Close pool & request payout →

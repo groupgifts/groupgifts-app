@@ -18,6 +18,8 @@ export async function sendContributorReceipt({
   recipient: string
   slug: string
 }) {
+  const poolUrl = `https://groupgifts.me/contribute/${slug}`
+
   await resend.emails.send({
     from: FROM,
     to,
@@ -26,16 +28,21 @@ export async function sendContributorReceipt({
       <div style="font-family: Georgia, serif; max-width: 520px; margin: 0 auto; padding: 40px 24px; color: #1a1a1a;">
         <div style="font-size: 32px; margin-bottom: 16px;">🎁</div>
         <h1 style="font-size: 24px; font-weight: 300; font-style: italic; margin: 0 0 8px;">You're in, ${contributorName}!</h1>
-        <p style="color: #888; font-size: 14px; margin: 0 0 32px;">Your contribution has been confirmed.</p>
+        <p style="color: #888; font-size: 14px; margin: 0 0 32px;">Your contribution has been confirmed. The organiser will collect all contributions and coordinate the gift purchase.</p>
 
-        <div style="background: #F4F3F0; border-radius: 12px; padding: 20px; margin-bottom: 32px;">
+        <div style="background: #F4F3F0; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
           <div style="font-size: 13px; color: #888; margin-bottom: 4px;">Pool</div>
           <div style="font-size: 16px; font-weight: 600;">${poolTitle}</div>
           <div style="font-size: 13px; color: #888; margin-top: 12px; margin-bottom: 4px;">For</div>
           <div style="font-size: 16px;">${recipient}</div>
-          <div style="font-size: 13px; color: #888; margin-top: 12px; margin-bottom: 4px;">Amount</div>
+          <div style="font-size: 13px; color: #888; margin-top: 12px; margin-bottom: 4px;">Your contribution</div>
           <div style="font-size: 22px; font-weight: 700; color: #E8733A;">$${amount.toFixed(2)}</div>
         </div>
+
+        <a href="${poolUrl}"
+          style="display: block; background: #E8733A; color: white; text-align: center; padding: 14px; border-radius: 10px; text-decoration: none; font-size: 14px; font-weight: 600; margin-bottom: 32px;">
+          View the pool →
+        </a>
 
         <p style="font-size: 13px; color: #aaa; text-align: center;">
           Made with <a href="https://groupgifts.me" style="color: #E8733A; text-decoration: none;">GroupGifts.me</a>
