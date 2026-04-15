@@ -17,8 +17,6 @@ export async function POST(req: NextRequest) {
     const { contribution_id } = await req.json()
     if (!contribution_id) return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
 
-    console.log('refund: user.id=', user.id, 'contribution_id=', contribution_id)
-
     // Fetch contribution + verify organiser owns the pool
     const { data: contribution } = await db
       .from('contributions')
@@ -28,11 +26,11 @@ export async function POST(req: NextRequest) {
       .single()
 
     if (!contribution) {
-      return NextResponse.json({ error: 'Contribution not found' }, { status: 404 })
+      return NextResponse.json({ error: `Contribution ${contribution_id} not found or not paid` }, { status: 404 })
     }
 
     if (contribution.pools.organiser_id !== user.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+      return NextResponse.json({ error: `Wrong owner: pool.organiser_id=${contribution.pools.organiser_id} token user.id=${user.id}` }, { status: 403 })
     }
 
     // Issue Stripe refund

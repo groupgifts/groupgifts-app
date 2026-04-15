@@ -15,17 +15,15 @@ export async function POST(req: NextRequest) {
     const { pool_id } = await req.json()
     if (!pool_id) return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
 
-    console.log('close-pool: user.id=', user.id, 'pool_id=', pool_id)
-
     // Verify organiser owns this pool
     const { data: pool } = await db
       .from('pools')
       .select('*')
       .eq('id', pool_id)
-      .eq('organiser_id', user.id)
       .single()
 
-    if (!pool) return NextResponse.json({ error: 'Not found' }, { status: 404 })
+    if (!pool) return NextResponse.json({ error: `Pool ${pool_id} does not exist` }, { status: 404 })
+    if (pool.organiser_id !== user.id) return NextResponse.json({ error: `Wrong owner: pool.organiser_id=${pool.organiser_id} token user.id=${user.id}` }, { status: 403 })
 
     // Close the pool
     await db.from('pools').update({
