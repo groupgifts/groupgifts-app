@@ -25,6 +25,17 @@ export async function POST(req: NextRequest) {
     if (!pool) return NextResponse.json({ error: `Pool ${pool_id} does not exist` }, { status: 404 })
     if (pool.organiser_id !== user.id) return NextResponse.json({ error: `Wrong owner: pool.organiser_id=${pool.organiser_id} token user.id=${user.id}` }, { status: 403 })
 
+    // Verify organiser has connected their bank
+    const { data: organiser } = await db
+      .from('organisers')
+      .select('stripe_account_id, stripe_onboarding_complete')
+      .eq('id', user.id)
+      .single()
+
+    if (!organiser?.stripe_account_id || !organiser?.stripe_onboarding_complete) {
+      return NextResponse.json({ error: 'You need to connect your bank account before closing a pool.' }, { status: 400 })
+    }
+
     // Close the pool
     await db.from('pools').update({
       status: 'paid_out',

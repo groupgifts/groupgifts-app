@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { supabase } from '@/lib/supabase'
+import { createServiceRoleClient } from '@/lib/supabase-server'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
@@ -27,6 +28,18 @@ export async function POST(req: NextRequest) {
 
     if (poolError || !pool) {
       return NextResponse.json({ error: 'Pool not found' }, { status: 404 })
+    }
+
+    // Fetch organiser's connected Stripe account
+    const db = createServiceRoleClient()
+    const { data: organiser } = await db
+      .from('organisers')
+      .select('stripe_account_id, stripe_onboarding_complete')
+      .eq('id', pool.organiser_id)
+      .single()
+
+    if (!organiser?.stripe_account_id || !organiser?.stripe_onboarding_complete) {
+      return NextResponse.json({ error: 'This pool is not ready to accept payments yet. The organiser needs to connect their bank account.' }, { status: 400 })
     }
 
     // Calculate fees so contributor covers everything
@@ -63,6 +76,12 @@ export async function POST(req: NextRequest) {
         },
       ],
       mode: 'payment',
+      payment_intent_data: {
+        application_fee_amount: Math.round(serviceFee * 100),
+        transfer_data: {
+          destination: organiser.stripe_account_id,
+        },
+      },
       metadata: {
         pool_id: pool.id,
         pool_slug: slug,

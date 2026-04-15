@@ -11,18 +11,20 @@ export default function Dashboard() {
   const [pools, setPools] = useState<any[]>([])
   const [user, setUser] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [bankConnected, setBankConnected] = useState(true)
 
   useEffect(() => {
     const init = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) { router.push('/login'); return }
       setUser(user)
-      const { data } = await supabase
-        .from('pools')
-        .select('*, contributions(amount, status)')
-        .eq('organiser_id', user.id)
-        .order('created_at', { ascending: false })
-      setPools(data || [])
+
+      const [poolsRes, organiserRes] = await Promise.all([
+        supabase.from('pools').select('*, contributions(amount, status)').eq('organiser_id', user.id).order('created_at', { ascending: false }),
+        supabase.from('organisers').select('stripe_onboarding_complete').eq('id', user.id).single(),
+      ])
+      setPools(poolsRes.data || [])
+      setBankConnected(organiserRes.data?.stripe_onboarding_complete === true)
       setLoading(false)
     }
     init()
@@ -62,6 +64,23 @@ export default function Dashboard() {
       </nav>
 
       <div className="max-w-3xl mx-auto px-6 py-10">
+
+        {/* Bank account banner */}
+        {!bankConnected && (
+          <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 mb-6 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">🏦</span>
+              <div>
+                <div className="text-sm font-semibold text-amber-900">Connect your bank account</div>
+                <div className="text-xs text-amber-700 mt-0.5">Required to receive payouts when you close a pool.</div>
+              </div>
+            </div>
+            <Link href="/connect"
+              className="bg-amber-500 text-white px-4 py-2 rounded-lg text-xs font-semibold hover:bg-amber-600 transition-colors whitespace-nowrap">
+              Connect now →
+            </Link>
+          </div>
+        )}
 
         {/* Summary stats */}
         {pools.length > 0 && (
