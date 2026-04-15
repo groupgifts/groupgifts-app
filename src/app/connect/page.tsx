@@ -47,7 +47,17 @@ function ConnectInner() {
         It only takes a few minutes and is fully secure.
       </p>
 
-      {error && <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg mb-6">{error}</div>}
+      {error && (
+        <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg mb-6">
+          {error.replace(/https?:\/\/\S+/g, '').trim()}{' '}
+          {error.match(/https?:\/\/\S+/) && (
+            <a href={error.match(/https?:\/\/\S+/)![0]} target="_blank" rel="noopener noreferrer"
+              className="underline font-medium">
+              {error.match(/https?:\/\/\S+/)![0]}
+            </a>
+          )}
+        </div>
+      )}
 
       <button onClick={startOnboarding} disabled={loading}
         className="w-full bg-[#E8733A] text-white py-3 rounded-xl font-semibold text-sm hover:bg-[#C85E28] transition-colors disabled:opacity-50">
