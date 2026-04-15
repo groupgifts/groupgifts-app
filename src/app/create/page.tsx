@@ -5,7 +5,16 @@ import { supabase } from '@/lib/supabase'
 import { getUser } from '@/lib/auth'
 import Logo from '@/components/Logo'
 
-const OCCASIONS = ['Birthday','Wedding','Baby Shower','Graduation','Anniversary','Retirement','Farewell','Celebration']
+const OCCASIONS = [
+  { value: 'Birthday',    emoji: '🎂' },
+  { value: 'Wedding',     emoji: '💍' },
+  { value: 'Baby Shower', emoji: '🍼' },
+  { value: 'Graduation',  emoji: '🎓' },
+  { value: 'Anniversary', emoji: '💝' },
+  { value: 'Retirement',  emoji: '🥂' },
+  { value: 'Farewell',    emoji: '✈️' },
+  { value: 'Celebration', emoji: '🎉' },
+]
 
 export default function CreatePool() {
   const router = useRouter()
@@ -110,19 +119,22 @@ export default function CreatePool() {
                     className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#E8733A]"
                     placeholder="recipient@email.com" />
                 </div>
-                <div className="flex gap-3">
-                  <div className="flex-1">
-                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Occasion</label>
-                    <select value={occasion} onChange={e => setOccasion(e.target.value)}
-                      className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#E8733A]">
-                      {OCCASIONS.map(o => <option key={o}>{o}</option>)}
-                    </select>
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">Occasion</label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {OCCASIONS.map(o => (
+                      <div key={o.value} onClick={() => setOccasion(o.value)}
+                        className={`flex flex-col items-center gap-1 p-2 rounded-xl border-2 cursor-pointer transition-all ${occasion === o.value ? 'border-[#E8733A] bg-orange-50' : 'border-gray-200 hover:border-gray-300'}`}>
+                        <span className="text-2xl">{o.emoji}</span>
+                        <span className={`text-xs font-medium text-center leading-tight ${occasion === o.value ? 'text-[#E8733A]' : 'text-gray-500'}`}>{o.value}</span>
+                      </div>
+                    ))}
                   </div>
-                  <div className="flex-1">
-                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Date</label>
-                    <input type="date" value={date} onChange={e => setDate(e.target.value)}
-                      className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#E8733A]" />
-                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Date</label>
+                  <input type="date" value={date} onChange={e => setDate(e.target.value)}
+                    className="mt-1 w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#E8733A]" />
                 </div>
               </div>
 
