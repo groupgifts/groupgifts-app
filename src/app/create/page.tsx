@@ -123,7 +123,18 @@ export default function CreatePool() {
                   <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">Occasion</label>
                   <div className="grid grid-cols-4 gap-2">
                     {OCCASIONS.map(o => (
-                      <div key={o.value} onClick={() => setOccasion(o.value)}
+                      <div key={o.value} onClick={() => {
+                        const oldEmoji = OCCASIONS.find(x => x.value === occasion)?.emoji || ''
+                        setOccasion(o.value)
+                        setTitle(prev => {
+                          // Strip any existing occasion emoji from end
+                          let t = prev.trimEnd()
+                          if (oldEmoji && t.endsWith(oldEmoji)) t = t.slice(0, -oldEmoji.length).trimEnd()
+                          // Also strip new emoji if already there (re-click same occasion)
+                          if (t.endsWith(o.emoji)) t = t.slice(0, -o.emoji.length).trimEnd()
+                          return t ? `${t} ${o.emoji}` : o.emoji
+                        })
+                      }}
                         className={`flex flex-col items-center gap-1 p-2 rounded-xl border-2 cursor-pointer transition-all ${occasion === o.value ? 'border-[#E8733A] bg-orange-50' : 'border-gray-200 hover:border-gray-300'}`}>
                         <span className="text-2xl">{o.emoji}</span>
                         <span className={`text-xs font-medium text-center leading-tight ${occasion === o.value ? 'text-[#E8733A]' : 'text-gray-500'}`}>{o.value}</span>
