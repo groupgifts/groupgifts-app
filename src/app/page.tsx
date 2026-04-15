@@ -411,6 +411,7 @@ export default function Home() {
             </span>
             <div style={{ display: 'flex', gap: 28 }}>
               <a href="mailto:hello@groupgifts.me" style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>hello@groupgifts.me</a>
+              <a href="/refund-policy" style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', textDecoration: 'none' }}>Refund Policy</a>
             </div>
             <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.25)' }}>© 2025 GroupGifts.me</span>
           </div>

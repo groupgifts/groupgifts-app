@@ -288,7 +288,9 @@ export default function Contribute() {
               </button>
             </div>
 
-            <p className="text-xs text-gray-400 text-center mt-3">Secured by Stripe</p>
+            <p className="text-xs text-gray-400 text-center mt-3">
+              Secured by Stripe · <a href="/refund-policy" target="_blank" className="underline hover:text-gray-600">Refund policy</a>
+            </p>
           </div>
         )}
       </main>
